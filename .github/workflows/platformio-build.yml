@@ -1,0 +1,46 @@
+name: PlatformIO Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build PlatformIO environments
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache PlatformIO and pip
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            ~/.cache/pip
+            .pio
+          key: ${{ runner.os }}-platformio-${{ hashFiles('**/platformio.ini') }}
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U platformio
+
+      - name: PlatformIO version
+        run: pio --version
+
+      - name: Build controller_ws3p5_dev
+        working-directory: Wireless_Controller
+        run: pio run -e controller_ws3p5_dev -v
+
+      - name: Build controller_esp32_d0wdr2_dev
+        working-directory: Wireless_Controller
+        run: pio run -e controller_esp32_d0wdr2_dev -v
